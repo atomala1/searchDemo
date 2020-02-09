@@ -5,7 +5,8 @@ rudimentary searching capabilities on a relational database
 
 ## Prerequisites
 
-The application requires Java 11 to run.
+The application requires Java 11 to run.  Java 11 was chosen since it is the most recent LTS version
+of java.  It has been tested on Java 13.
 
 ## Running tests
 
