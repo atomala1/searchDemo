@@ -6,7 +6,9 @@ rudimentary searching capabilities on a relational database
 ## Prerequisites
 
 The application requires Java 11 to run.  Java 11 was chosen since it is the most recent LTS version
-of java.  It has been tested on Java 13.
+of java.
+
+The application was tested on and built Java 13.
 
 ## Running tests
 
@@ -49,6 +51,13 @@ just defaulting to `AND`.
 Search currently only happens on the root object since I assumed this API would be consumed by some
 sort of front end.  If search is supposed to happen on embedded objects, the query builder would just
 need to be expanded to include a join and add the corresponding `Specification` to the query.
+
+Partial matches are supported for any `String` type queries.
+
+Invalid `value` queries are returned as a `400 BAD_REQUEST` with information about what field is invalid and 
+what type is expected.
+
+Invalid `key` queries are ignored.
 
 ```bash
 curl -X GET \
