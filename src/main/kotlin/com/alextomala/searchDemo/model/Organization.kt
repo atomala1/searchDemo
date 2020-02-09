@@ -15,15 +15,18 @@ class Organization(
         val url: String,
         val externalId: String,
         val name: String,
+        val details: String?,
+        val sharedTickets: Boolean,
+
         @ElementCollection
         @CollectionTable(name = "organization_domain_names", joinColumns = [JoinColumn(name = "organization_id")])
         @Column(name = "domain_name")
         val domainNames: List<String>,
+
         @JsonDeserialize(using = OffsetDateTimeDeserializer::class)
         @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
         val createdAt: OffsetDateTime,
-        val details: String?,
-        val sharedTickets: Boolean,
+
         @ElementCollection
         @CollectionTable(name = "organization_tags", joinColumns = [JoinColumn(name = "organization_id")])
         @Column(name = "tag")

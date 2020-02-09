@@ -15,26 +15,29 @@ data class Ticket(
         @Id @JsonProperty("_id") val id: UUID,
         val url: String,
         val externalId: String?,
-        @JsonDeserialize(using = OffsetDateTimeDeserializer::class)
-        @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-        val createdAt: OffsetDateTime,
         val type: String?,
         val subject: String,
         val description: String?,
         val priority: String,
         val status: String,
+        val via: String,
+        val hasIncidents: Boolean,
         @Transient @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) val submitterId: Int?,
         @Transient @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) val assigneeId: Int?,
         @Transient @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) val organizationId: Int?,
+
+        @JsonDeserialize(using = OffsetDateTimeDeserializer::class)
+        @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+        val createdAt: OffsetDateTime,
+
         @ElementCollection
         @CollectionTable(name = "ticket_tags", joinColumns = [JoinColumn(name = "ticket_id")])
         @Column(name = "tag")
         val tags: List<String>,
-        val hasIncidents: Boolean,
+
         @JsonDeserialize(using = OffsetDateTimeDeserializer::class)
         @Column(name = "due_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
         val dueAt: OffsetDateTime?,
-        val via: String,
 
         @OneToOne
         @JoinColumn(name = "s_id")

@@ -18,14 +18,14 @@ open class BaseRepository<T> {
                 .map { it.toString().split("=".toRegex()) }
                 .filter { it.size in arrayOf(2) }
                 .map { terms ->
-                    test(collection, root, builder, terms[0], terms[1])
+                    getOptionalPredicate(collection, root, builder, terms[0], terms[1])
                             .ifPresent { predicates.add(it) }
                 }
 
         return predicates.toList()
     }
 
-    private fun test(collection: Collection<KProperty1<*, *>>, root: Root<*>, builder: CriteriaBuilder, key: String, value: String): Optional<Predicate> {
+    private fun getOptionalPredicate(collection: Collection<KProperty1<*, *>>, root: Root<*>, builder: CriteriaBuilder, key: String, value: String): Optional<Predicate> {
         return collection.stream()
                 .filter { it.name == key }
                 .findFirst()
@@ -34,6 +34,7 @@ open class BaseRepository<T> {
                         List::class.java -> handleListPredicate(property, root, builder, value)
                         Boolean::class.java -> handleBooleanPredicate(property, root, builder, value)
                         OffsetDateTime::class.java -> handleOffsetDateTimePredicate(property, root, builder, value)
+                        Int::class.java -> handleIntegerProperty(property, root, builder, value)
                         else -> handleStringPredicate(property, root, builder, value)
                     }
                 }
@@ -54,6 +55,18 @@ open class BaseRepository<T> {
 
     private fun handleBooleanPredicate(property: KProperty1<*, *>, root: Root<*>, builder: CriteriaBuilder, value: String): Predicate {
         return builder.equal(root.get<String>(property.name), value.toBoolean())
+    }
+
+    private fun handleIntegerProperty(property: KProperty1<*, *>, root: Root<*>, builder: CriteriaBuilder, value: String): Predicate {
+        try {
+            return if (value.isNotBlank()) {
+                builder.equal(root.get<String>(property.name), Integer.parseInt(value))
+            } else {
+                builder.isNull(root.get<String>(property.name))
+            }
+        } catch (e: NumberFormatException) {
+            throw IllegalArgumentException("Value $value for parameter ${property.name} was not of type Integer")
+        }
     }
 
     private fun handleOffsetDateTimePredicate(property: KProperty1<*, *>, root: Root<*>, builder: CriteriaBuilder, value: String): Predicate {

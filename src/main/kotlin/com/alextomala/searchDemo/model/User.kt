@@ -16,27 +16,30 @@ data class User(
         val externalId: String,
         val name: String,
         val alias: String?,
-        @JsonDeserialize(using = OffsetDateTimeDeserializer::class)
-        @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-        val createdAt: OffsetDateTime,
         val active: Boolean,
         val verified: Boolean,
         val shared: Boolean,
         val locale: String?,
         val timezone: String?,
-        @JsonDeserialize(using = OffsetDateTimeDeserializer::class)
-        @Column(name = "last_login_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-        val lastLoginAt: OffsetDateTime?,
         val email: String?,
         val phone: String,
         val signature: String,
+        val suspended: Boolean,
+        val role: String,
         @Transient @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) val organizationId: Int?,
+
+        @JsonDeserialize(using = OffsetDateTimeDeserializer::class)
+        @Column(name = "last_login_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+        val lastLoginAt: OffsetDateTime?,
+
+        @JsonDeserialize(using = OffsetDateTimeDeserializer::class)
+        @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+        val createdAt: OffsetDateTime,
+
         @ElementCollection
         @CollectionTable(name = "user_tags", joinColumns = [JoinColumn(name = "user_id")])
         @Column(name = "tag")
         val tags: List<String>,
-        val suspended: Boolean,
-        val role: String,
 
         @OneToOne
         @JoinColumn(name = "o_id")

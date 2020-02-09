@@ -25,9 +25,33 @@ The application runs on port 8080
 
 API Documentation is available at `http://localhost:8080/swagger-ui.html`
 
+I chose three separate endpoints since there were three separate data types.
+
+These are the three root APIs:
+
+```bash
+http://localhost:8080/organizations
+http://localhost:8080/users
+http://localhost:8080/tickets
+```
+
+I added a `getAll` and `findById` method in these APIs mostly for my own testing purposes.  Since they 
+fit the normal rest format, I left them.
+
+## Search Format
+
+I picked a very simple query format for this project: comma separated `key=value` pairs.  All `key=value` pairs
+will be `ANDed` together due to time constraints.  If this was a fully fleshed out app, I could
+convert the comma separator into `&` or `|` and build the criteria with `AND` or `OR` instead of 
+just defaulting to `AND`.
+
+Search currently only happens on the root object since I assumed this API would be consumed by some
+sort of front end.  If search is supposed to happen on embedded objects, the query builder would just
+need to be expanded to include a join and add the corresponding `Specification` to the query.
+
 ```bash
 curl -X GET \
-  'http://localhost:8080/organizations/search?query=name=Nutralab'
+  'http://localhost:8080/organizations/search?query=id=102,name=Nutralab'
 ```
 
 ## Contributing

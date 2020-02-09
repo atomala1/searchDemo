@@ -3,30 +3,31 @@ package com.alextomala.searchDemo.config
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonTokenId
 import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 
 @Configuration
-class JacksonConfig {
-
-    @Primary
-    @Bean
-    fun objectMapper(builder: Jackson2ObjectMapperBuilder): ObjectMapper {
-        val objectMapper = builder.build<ObjectMapper>()
-        objectMapper.registerModule(JavaTimeModule())
-        objectMapper.registerModule(KotlinModule())
-        return objectMapper
+class JacksonConfig(objectMapper: ObjectMapper) {
+    init {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     }
+
+    @Bean
+    fun javaTimeModule() = JavaTimeModule()
+
+    @Bean
+    fun jdk8TimeModule() = Jdk8Module()
 }
 
 class OffsetDateTimeDeserializer : StdDeserializer<OffsetDateTime>(OffsetDateTime::class.java) {
