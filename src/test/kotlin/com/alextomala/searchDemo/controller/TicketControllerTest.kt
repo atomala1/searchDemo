@@ -15,6 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import java.time.OffsetDateTime
 import java.util.*
 
 @ExtendWith(SpringExtension::class)
@@ -44,7 +45,9 @@ class TicketControllerTest {
             organization = null,
             organizationId = null,
             submitter = null,
-            submitterId = null
+            submitterId = null,
+            createdAt = OffsetDateTime.now(),
+            dueAt = OffsetDateTime.now()
     )
 
     @Test

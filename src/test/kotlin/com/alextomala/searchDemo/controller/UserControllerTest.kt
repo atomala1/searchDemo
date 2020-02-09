@@ -15,6 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import java.time.OffsetDateTime
 
 @ExtendWith(SpringExtension::class)
 @WebMvcTest(controllers = [UserController::class])
@@ -44,7 +45,9 @@ class UserControllerTest {
             organization = null,
             organizationId = null,
             suspended = false,
-            role = ""
+            role = "",
+            createdAt = OffsetDateTime.now(),
+            lastLoginAt = OffsetDateTime.now()
     )
 
     @Test

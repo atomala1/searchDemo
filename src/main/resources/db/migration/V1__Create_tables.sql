@@ -3,6 +3,7 @@ CREATE TABLE organization (
    url varchar NOT NULL,
    external_id VARCHAR NOT NULL,
    name VARCHAR NOT NULL,
+   created_at TIMESTAMP WITH TIME ZONE,
    details VARCHAR,
    shared_tickets bit NOT NULL
 );
@@ -33,7 +34,9 @@ CREATE TABLE user (
     signature VARCHAR,
     o_id Int,
     suspended BIT,
-    role VARCHAR
+    role VARCHAR,
+    created_at TIMESTAMP WITH TIME ZONE,
+    last_login_at TIMESTAMP WITH TIME ZONE
 );
 
 CREATE TABLE user_tags (
@@ -55,7 +58,9 @@ CREATE TABLE ticket (
     priority VARCHAR,
     status VARCHAR,
     has_incidents bit,
-    via VARCHAR
+    via VARCHAR,
+    created_at TIMESTAMP WITH TIME ZONE,
+    due_at TIMESTAMP WITH TIME ZONE
 );
 
 CREATE TABLE ticket_tags (

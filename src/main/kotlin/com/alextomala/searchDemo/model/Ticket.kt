@@ -1,8 +1,11 @@
 package com.alextomala.searchDemo.model
 
+import com.alextomala.searchDemo.config.OffsetDateTimeDeserializer
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonNaming
+import java.time.OffsetDateTime
 import java.util.*
 import javax.persistence.*
 
@@ -12,7 +15,9 @@ data class Ticket(
         @Id @JsonProperty("_id") val id: UUID,
         val url: String,
         val externalId: String?,
-//        val createdAt: OffsetDateTime,
+        @JsonDeserialize(using = OffsetDateTimeDeserializer::class)
+        @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+        val createdAt: OffsetDateTime,
         val type: String?,
         val subject: String,
         val description: String?,
@@ -26,7 +31,9 @@ data class Ticket(
         @Column(name = "tag")
         val tags: List<String>,
         val hasIncidents: Boolean,
-//        val dueAt: OffsetDateTime,
+        @JsonDeserialize(using = OffsetDateTimeDeserializer::class)
+        @Column(name = "due_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+        val dueAt: OffsetDateTime?,
         val via: String,
 
         @OneToOne

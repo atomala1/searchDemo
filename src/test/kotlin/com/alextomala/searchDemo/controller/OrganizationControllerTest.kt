@@ -15,6 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import java.time.OffsetDateTime
 
 @ExtendWith(SpringExtension::class)
 @WebMvcTest(controllers = [OrganizationController::class])
@@ -30,6 +31,7 @@ class OrganizationControllerTest {
             id = 101,
             name = "Enthaze",
             url = "http://initech.zendesk.com/api/v2/organizations/101.json",
+            createdAt = OffsetDateTime.now(),
             domainNames = listOf(
                     "kage.com",
                     "ecratic.com",

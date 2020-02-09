@@ -26,7 +26,7 @@ internal class OrganizationRepositoryTest {
     }
 
     @Test
-    fun `Test Search - Description is Empty`() {
+    fun `Test Search - Details Field is Empty`() {
         val searchQuery = listOf("details=")
         val found = organizationRepository.findAll(OrganizationSpecification(searchQuery))
 
