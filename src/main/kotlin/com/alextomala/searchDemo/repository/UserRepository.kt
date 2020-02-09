@@ -15,22 +15,8 @@ interface UserRepository : CrudRepository<User, Int>, JpaSpecificationExecutor<U
 
 class UserSpecification(private val options: List<String>) : Specification<User>, BaseRepository<User>() {
     override fun toPredicate(root: Root<User>, query: CriteriaQuery<*>, builder: CriteriaBuilder): Predicate? {
-        val queries = fieldQueryToCriteria(root, builder, options)
+        val queries = fieldQueryToCriteria(root, builder, User::class.memberProperties, options)
         query.distinct(true)
         return builder.and(*queries.toTypedArray<Predicate>())
-    }
-
-    private fun fieldQueryToCriteria(root: Root<*>, builder: CriteriaBuilder, queryParameters: List<*>): List<Predicate> {
-        return queryParameters.asSequence()
-                .map { it.toString().split("=".toRegex()) }
-                .filter { it.size in arrayOf(2) }
-                .map { terms ->
-                    getStringProperties(root, builder, User::class.memberProperties, terms[0], terms[1]) +
-                            getListProperties(root, builder, User::class.memberProperties, terms[0], terms[1]) +
-                            getBooleanProperties(root, builder, User::class.memberProperties, terms[0], terms[1]) +
-                            getOffsetDateTimeProperties(root, builder, User::class.memberProperties, terms[0], terms[1])
-                }
-                .flatten()
-                .toList()
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.time.OffsetDateTime
+import java.util.*
 
 @ExtendWith(SpringExtension::class)
 @WebMvcTest(controllers = [OrganizationController::class])
@@ -68,5 +69,35 @@ class OrganizationControllerTest {
         mockMvc.get("/organizations/search?query=name=Enthaze")
                 .andExpect { MockMvcResultMatchers.status().isOk }
                 .andExpect { MockMvcResultMatchers.content().string("[]") }
+    }
+
+    @Test
+    fun `GetById - Organization Not Found`() {
+        Mockito.`when`(repository.findById(testOrg.id))
+                .thenReturn(Optional.empty())
+
+        mockMvc.get("/organizations/${testOrg.id}")
+                .andExpect { MockMvcResultMatchers.status().isBadRequest }
+                .andExpect { jsonPath("$.message", Matchers.`is`("Organization not found with id 101")) }
+    }
+
+    @Test
+    fun `GetById - Organization Found`() {
+        Mockito.`when`(repository.findById(testOrg.id))
+                .thenReturn(Optional.of(testOrg))
+
+        mockMvc.get("/organizations/${testOrg.id}")
+                .andExpect { MockMvcResultMatchers.status().isOk }
+                .andExpect { MockMvcResultMatchers.jsonPath("$.name").value("Enthaze") }
+    }
+
+    @Test
+    fun `GetAll - Organization Found`() {
+        Mockito.`when`(repository.findAll())
+                .thenReturn(listOf(testOrg))
+
+        mockMvc.get("/organizations")
+                .andExpect { MockMvcResultMatchers.status().isOk }
+                .andExpect { MockMvcResultMatchers.jsonPath("$.name").value("Enthaze") }
     }
 }

@@ -1,5 +1,6 @@
 package com.alextomala.searchDemo.controller
 
+import com.alextomala.searchDemo.exception.EntityNotFoundException
 import com.alextomala.searchDemo.model.Organization
 import com.alextomala.searchDemo.repository.OrganizationRepository
 import com.alextomala.searchDemo.repository.OrganizationSpecification
@@ -21,7 +22,7 @@ class OrganizationController(val organizationRepository: OrganizationRepository)
     @GetMapping("/{id}")
     fun getOrganizationById(@PathVariable("id") id: Int): Organization {
         return organizationRepository.findById(id)
-                .orElseThrow { RuntimeException("Organization not found") }
+                .orElseThrow { EntityNotFoundException("Organization not found with id $id") }
     }
 
     @GetMapping("/search")

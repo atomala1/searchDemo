@@ -1,5 +1,6 @@
 package com.alextomala.searchDemo.controller
 
+import com.alextomala.searchDemo.exception.EntityNotFoundException
 import com.alextomala.searchDemo.model.User
 import com.alextomala.searchDemo.repository.UserRepository
 import com.alextomala.searchDemo.repository.UserSpecification
@@ -21,7 +22,7 @@ class UserController(val userRepository: UserRepository) {
     @GetMapping("/{id}")
     fun getUserById(@PathVariable("id") id: Int): User {
         return userRepository.findById(id)
-                .orElseThrow { RuntimeException("User not found") }
+                .orElseThrow { EntityNotFoundException("User not found with id $id") }
     }
 
     @GetMapping("/search")

@@ -11,7 +11,21 @@ import kotlin.reflect.KProperty1
 
 open class BaseRepository<T> {
 
-    fun getStringProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
+    fun fieldQueryToCriteria(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, queryParameters: List<*>): List<Predicate> {
+        return queryParameters.asSequence()
+                .map { it.toString().split("=".toRegex()) }
+                .filter { it.size in arrayOf(2) }
+                .map { terms ->
+                    getStringProperties(root, builder, collection, terms[0], terms[1]) +
+                            getListProperties(root, builder, collection, terms[0], terms[1]) +
+                            getBooleanProperties(root, builder, collection, terms[0], terms[1]) +
+                            getOffsetDateTimeProperties(root, builder, collection, terms[0], terms[1])
+                }
+                .flatten()
+                .toList()
+    }
+
+    private fun getStringProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
         return collection.stream()
                 .filter { it.name == key && root.get<Any>(it.name).javaType == String::class.java }
                 .map {
@@ -24,7 +38,7 @@ open class BaseRepository<T> {
                 .collect(Collectors.toList())
     }
 
-    fun getListProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
+    private fun getListProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
         return collection.stream()
                 .filter { it.name == key && root.get<Any>(it.name).javaType == List::class.java }
                 .map {
@@ -34,14 +48,14 @@ open class BaseRepository<T> {
                 .collect(Collectors.toList())
     }
 
-    fun getBooleanProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
+    private fun getBooleanProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
         return collection.stream()
                 .filter { it.name == key && root.get<Any>(it.name).javaType == Boolean::class.java }
                 .map { builder.equal(root.get<String>(it.name), value.toBoolean()) }
                 .collect(Collectors.toList())
     }
 
-    fun getOffsetDateTimeProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
+    private fun getOffsetDateTimeProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
         try {
             return collection.stream()
                     .filter { it.name == key && root.get<Any>(it.name).javaType == OffsetDateTime::class.java }

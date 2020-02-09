@@ -16,22 +16,8 @@ interface TicketRepository : CrudRepository<Ticket, UUID>, JpaSpecificationExecu
 
 class TicketSpecification(private val options: List<String>) : Specification<Ticket>, BaseRepository<Ticket>() {
     override fun toPredicate(root: Root<Ticket>, query: CriteriaQuery<*>, builder: CriteriaBuilder): Predicate? {
-        val queries = fieldQueryToCriteria(root, builder, options)
+        val queries = fieldQueryToCriteria(root, builder, Ticket::class.memberProperties, options)
         query.distinct(true)
         return builder.and(*queries.toTypedArray<Predicate>())
-    }
-
-    private fun fieldQueryToCriteria(root: Root<*>, builder: CriteriaBuilder, queryParameters: List<*>): List<Predicate> {
-        return queryParameters.asSequence()
-                .map { it.toString().split("=".toRegex()) }
-                .filter { it.size in arrayOf(2) }
-                .map { terms ->
-                    getStringProperties(root, builder, Ticket::class.memberProperties, terms[0], terms[1]) +
-                            getListProperties(root, builder, Ticket::class.memberProperties, terms[0], terms[1]) +
-                            getBooleanProperties(root, builder, Ticket::class.memberProperties, terms[0], terms[1]) +
-                            getOffsetDateTimeProperties(root, builder, Ticket::class.memberProperties, terms[0], terms[1])
-                }
-                .flatten()
-                .toList()
     }
 }

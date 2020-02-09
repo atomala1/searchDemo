@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.time.OffsetDateTime
+import java.util.*
 
 @ExtendWith(SpringExtension::class)
 @WebMvcTest(controllers = [UserController::class])
@@ -75,5 +76,35 @@ class UserControllerTest {
         mockMvc.get("/users/search?query=name=Test Person")
                 .andExpect { MockMvcResultMatchers.status().isOk }
                 .andExpect { MockMvcResultMatchers.content().string("[]") }
+    }
+
+    @Test
+    fun `GetById - User Not Found`() {
+        Mockito.`when`(repository.findById(testUser.id))
+                .thenReturn(Optional.empty())
+
+        mockMvc.get("/users/${testUser.id}")
+                .andExpect { MockMvcResultMatchers.status().isBadRequest }
+                .andExpect { jsonPath("$.message", Matchers.`is`("User not found with id 101")) }
+    }
+
+    @Test
+    fun `GetById - User Found`() {
+        Mockito.`when`(repository.findById(testUser.id))
+                .thenReturn(Optional.of(testUser))
+
+        mockMvc.get("/users/${testUser.id}")
+                .andExpect { MockMvcResultMatchers.status().isOk }
+                .andExpect { MockMvcResultMatchers.jsonPath("$.name").value("Test Person") }
+    }
+
+    @Test
+    fun `GetAll - Users Found`() {
+        Mockito.`when`(repository.findAll())
+                .thenReturn(listOf(testUser))
+
+        mockMvc.get("/users")
+                .andExpect { MockMvcResultMatchers.status().isOk }
+                .andExpect { MockMvcResultMatchers.jsonPath("$.name").value("Test Person") }
     }
 }

@@ -14,22 +14,8 @@ interface OrganizationRepository : CrudRepository<Organization, Int>, JpaSpecifi
 
 class OrganizationSpecification(private val options: List<String>) : Specification<Organization>, BaseRepository<Organization>() {
     override fun toPredicate(root: Root<Organization>, query: CriteriaQuery<*>, builder: CriteriaBuilder): Predicate? {
-        val queries = fieldQueryToCriteria(root, builder, options)
+        val queries = fieldQueryToCriteria(root, builder, Organization::class.memberProperties, options)
         query.distinct(true)
         return builder.and(*queries.toTypedArray<Predicate>())
-    }
-
-    private fun fieldQueryToCriteria(root: Root<*>, builder: CriteriaBuilder, queryParameters: List<*>): List<Predicate> {
-        return queryParameters.asSequence()
-                .map { it.toString().split("=".toRegex()) }
-                .filter { it.size in arrayOf(2) }
-                .map { terms ->
-                    getStringProperties(root, builder, Organization::class.memberProperties, terms[0], terms[1]) +
-                            getListProperties(root, builder, Organization::class.memberProperties, terms[0], terms[1]) +
-                            getBooleanProperties(root, builder, Organization::class.memberProperties, terms[0], terms[1]) +
-                            getOffsetDateTimeProperties(root, builder, Organization::class.memberProperties, terms[0], terms[1])
-                }
-                .flatten()
-                .toList()
     }
 }

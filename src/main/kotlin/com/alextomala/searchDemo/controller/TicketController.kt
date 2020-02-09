@@ -1,5 +1,6 @@
 package com.alextomala.searchDemo.controller
 
+import com.alextomala.searchDemo.exception.EntityNotFoundException
 import com.alextomala.searchDemo.model.Ticket
 import com.alextomala.searchDemo.repository.TicketRepository
 import com.alextomala.searchDemo.repository.TicketSpecification
@@ -22,7 +23,7 @@ class TicketController(val ticketRepository: TicketRepository) {
     @GetMapping("/{id}")
     fun getTicketById(@PathVariable("id") id: UUID): Ticket {
         return ticketRepository.findById(id)
-                .orElseThrow { RuntimeException("Ticket not found") }
+                .orElseThrow { EntityNotFoundException("Ticket not found with id $id") }
     }
 
     @GetMapping("/search")
