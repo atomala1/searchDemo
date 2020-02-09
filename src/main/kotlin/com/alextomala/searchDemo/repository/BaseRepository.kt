@@ -2,7 +2,7 @@ package com.alextomala.searchDemo.repository
 
 import java.time.OffsetDateTime
 import java.time.format.DateTimeParseException
-import java.util.stream.Collectors
+import java.util.*
 import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.criteria.ListJoin
 import javax.persistence.criteria.Predicate
@@ -12,63 +12,59 @@ import kotlin.reflect.KProperty1
 open class BaseRepository<T> {
 
     fun fieldQueryToCriteria(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, queryParameters: List<*>): List<Predicate> {
-        return queryParameters.asSequence()
+        val predicates = mutableListOf<Predicate>()
+
+        queryParameters
                 .map { it.toString().split("=".toRegex()) }
                 .filter { it.size in arrayOf(2) }
                 .map { terms ->
-                    getStringProperties(root, builder, collection, terms[0], terms[1]) +
-                            getListProperties(root, builder, collection, terms[0], terms[1]) +
-                            getBooleanProperties(root, builder, collection, terms[0], terms[1]) +
-                            getOffsetDateTimeProperties(root, builder, collection, terms[0], terms[1])
+                    test(collection, root, builder, terms[0], terms[1])
+                            .ifPresent { predicates.add(it) }
                 }
-                .flatten()
-                .toList()
+
+        return predicates.toList()
     }
 
-    private fun getStringProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
+    private fun test(collection: Collection<KProperty1<*, *>>, root: Root<*>, builder: CriteriaBuilder, key: String, value: String): Optional<Predicate> {
         return collection.stream()
-                .filter { it.name == key && root.get<Any>(it.name).javaType == String::class.java }
-                .map {
-                    if (value.isNotBlank()) {
-                        builder.like(builder.lower(root.get<String>(it.name)), "%${value.toLowerCase()}%")
-                    } else {
-                        builder.isNull(root.get<String>(it.name))
+                .filter { it.name == key }
+                .findFirst()
+                .map { property ->
+                    when (root.get<Any>(property.name).javaType) {
+                        List::class.java -> handleListPredicate(property, root, builder, value)
+                        Boolean::class.java -> handleBooleanPredicate(property, root, builder, value)
+                        OffsetDateTime::class.java -> handleOffsetDateTimePredicate(property, root, builder, value)
+                        else -> handleStringPredicate(property, root, builder, value)
                     }
                 }
-                .collect(Collectors.toList())
     }
 
-    private fun getListProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
-        return collection.stream()
-                .filter { it.name == key && root.get<Any>(it.name).javaType == List::class.java }
-                .map {
-                    val join: ListJoin<T, String> = root.joinList(it.name)
-                    builder.like(builder.lower(join), "%${value.toLowerCase()}%")
-                }
-                .collect(Collectors.toList())
+    private fun handleStringPredicate(property: KProperty1<*, *>, root: Root<*>, builder: CriteriaBuilder, value: String): Predicate {
+        return if (value.isNotBlank()) {
+            builder.like(builder.lower(root.get<String>(property.name)), "%${value.toLowerCase()}%")
+        } else {
+            builder.isNull(root.get<String>(property.name))
+        }
     }
 
-    private fun getBooleanProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
-        return collection.stream()
-                .filter { it.name == key && root.get<Any>(it.name).javaType == Boolean::class.java }
-                .map { builder.equal(root.get<String>(it.name), value.toBoolean()) }
-                .collect(Collectors.toList())
+    private fun handleListPredicate(property: KProperty1<*, *>, root: Root<*>, builder: CriteriaBuilder, value: String): Predicate {
+        val join: ListJoin<T, String> = root.joinList(property.name)
+        return builder.like(builder.lower(join), "%${value.toLowerCase()}%")
     }
 
-    private fun getOffsetDateTimeProperties(root: Root<*>, builder: CriteriaBuilder, collection: Collection<KProperty1<*, *>>, key: String, value: String): List<Predicate> {
+    private fun handleBooleanPredicate(property: KProperty1<*, *>, root: Root<*>, builder: CriteriaBuilder, value: String): Predicate {
+        return builder.equal(root.get<String>(property.name), value.toBoolean())
+    }
+
+    private fun handleOffsetDateTimePredicate(property: KProperty1<*, *>, root: Root<*>, builder: CriteriaBuilder, value: String): Predicate {
         try {
-            return collection.stream()
-                    .filter { it.name == key && root.get<Any>(it.name).javaType == OffsetDateTime::class.java }
-                    .map {
-                        if (value.isNotBlank()) {
-                            builder.equal(root.get<String>(it.name), OffsetDateTime.parse(value))
-                        } else {
-                            builder.isNull(root.get<String>(it.name))
-                        }
-                    }
-                    .collect(Collectors.toList())
+            return if (value.isNotBlank()) {
+                builder.equal(root.get<String>(property.name), OffsetDateTime.parse(value))
+            } else {
+                builder.isNull(root.get<String>(property.name))
+            }
         } catch (e: DateTimeParseException) {
-            throw IllegalArgumentException("Value $value for parameter $key was not of type OffsetDateTime")
+            throw IllegalArgumentException("Value $value for parameter ${property.name} was not of type OffsetDateTime")
         }
     }
 }
