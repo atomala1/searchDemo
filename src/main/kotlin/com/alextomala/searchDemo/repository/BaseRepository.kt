@@ -35,6 +35,7 @@ open class BaseRepository<T> {
                         Boolean::class.java -> handleBooleanPredicate(property, root, builder, value)
                         OffsetDateTime::class.java -> handleOffsetDateTimePredicate(property, root, builder, value)
                         Int::class.java -> handleIntegerProperty(property, root, builder, value)
+                        UUID::class.java -> handleUUIDProperty(property, root, builder, value)
                         else -> handleStringPredicate(property, root, builder, value)
                     }
                 }
@@ -66,6 +67,18 @@ open class BaseRepository<T> {
             }
         } catch (e: NumberFormatException) {
             throw IllegalArgumentException("Value $value for parameter ${property.name} was not of type Integer")
+        }
+    }
+
+    private fun handleUUIDProperty(property: KProperty1<*, *>, root: Root<*>, builder: CriteriaBuilder, value: String): Predicate {
+        try {
+            return if (value.isNotBlank()) {
+                builder.equal(root.get<String>(property.name), UUID.fromString(value))
+            } else {
+                builder.isNull(root.get<String>(property.name))
+            }
+        } catch (e: IllegalArgumentException) {
+            throw IllegalArgumentException("Value $value for parameter ${property.name} was not of type UUID")
         }
     }
 

@@ -8,6 +8,13 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.time.OffsetDateTime
 import javax.persistence.*
 
+
+/**
+ * I'm not normally a fan of putting both the database object and view object together.  I think it adds
+ * many different annotations and makes any consumers very dependent on the database model.
+ *
+ * I just did it this way as a quick demo of reading/writing from a database.
+ */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy::class)
 @Entity
 class Organization(

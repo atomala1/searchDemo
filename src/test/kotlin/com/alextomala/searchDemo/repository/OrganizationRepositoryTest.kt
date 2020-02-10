@@ -80,7 +80,6 @@ internal class OrganizationRepositoryTest {
         assertThat(found[0].name).isEqualTo("Enthaze")
     }
 
-
     @Test
     fun `Search - Int Field - Valid`() {
         val searchQuery = listOf("id=101")
@@ -91,7 +90,7 @@ internal class OrganizationRepositoryTest {
     }
 
     @Test
-    fun `Search - Boolean Field - Invalid`() {
+    fun `Search - Int Field - Invalid`() {
         val searchQuery = listOf("id=asdf")
         Assertions.assertThrows(InvalidDataAccessApiUsageException::class.java) {
             organizationRepository.findAll(OrganizationSpecification(searchQuery))

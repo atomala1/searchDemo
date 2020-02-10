@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.dao.InvalidDataAccessApiUsageException
 
 @SpringBootTest
 internal class TicketRepositoryTest {
@@ -31,5 +32,23 @@ internal class TicketRepositoryTest {
 
         Assertions.assertThat(found.count()).isEqualTo(13)
         Assertions.assertThat(found[0].subject).isEqualTo("A Catastrophe in Cape Verde")
+    }
+
+
+    @Test
+    fun `Search - UUID Field - Valid`() {
+        val searchQuery = listOf("id=436bf9b0-1147-4c0a-8439-6f79833bff5b")
+        val found = ticketRepository.findAll(TicketSpecification(searchQuery))
+
+        Assertions.assertThat(found.count()).isEqualTo(1)
+        Assertions.assertThat(found[0].url).isEqualTo("http://initech.zendesk.com/api/v2/tickets/436bf9b0-1147-4c0a-8439-6f79833bff5b.json")
+    }
+
+    @Test
+    fun `Search - UUID Field - Invalid`() {
+        val searchQuery = listOf("id=asdf")
+        org.junit.jupiter.api.Assertions.assertThrows(InvalidDataAccessApiUsageException::class.java) {
+            ticketRepository.findAll(TicketSpecification(searchQuery))
+        }
     }
 }
